@@ -1,0 +1,94 @@
+<div class="contenedor">
+  <h1 class="titulo-pagina">Agenda del día</h1>
+  <p class="subtitulo-pagina">
+    Turnos asignados para la fecha seleccionada.
+    @if (cantidadPendientes() > 0) {
+      Quedan {{ cantidadPendientes() }} sin registrar asistencia.
+    }
+  </p>
+
+  <div class="panel">
+    <div class="panel-encabezado">
+      <div class="campo">
+        <label for="fecha">Fecha</label>
+        <input
+          id="fecha"
+          type="date"
+          pInputText
+          [value]="fecha()"
+          (change)="cambiarFecha($any($event.target).value)"
+        />
+      </div>
+
+      <span class="separador-flexible"></span>
+
+      <p-button
+        label="Actualizar"
+        severity="secondary"
+        [outlined]="true"
+        size="small"
+        [loading]="cargando()"
+        (onClick)="cargar()"
+      />
+    </div>
+
+    @if (cargando()) {
+      <div class="estado-vacio"><p>Cargando agenda...</p></div>
+    } @else if (turnos().length === 0) {
+      <div class="estado-vacio">
+        <p>No hay turnos asignados para esta fecha.</p>
+      </div>
+    } @else {
+      <div class="tabla-scroll">
+        <p-table [value]="turnos()" [tableStyle]="{ 'min-width': '46rem' }">
+          <ng-template #header>
+            <tr>
+              <th style="width: 5.5rem">Hora</th>
+              <th>Paciente</th>
+              <th style="width: 9rem">Documento</th>
+              <th style="width: 8rem">Arancel</th>
+              <th style="width: 8rem">Estado</th>
+              <th style="width: 13rem">Asistencia</th>
+            </tr>
+          </ng-template>
+
+          <ng-template #body let-turno>
+            <tr>
+              <td class="numerico">
+                <strong>{{ turno.fechaHora | date: 'HH:mm' }}</strong>
+              </td>
+              <td>{{ turno.paciente }}</td>
+              <td class="numerico">{{ turno.documentoPaciente }}</td>
+              <td class="numerico">
+                {{ turno.valorConsulta | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}
+              </td>
+              <td><app-estado-reserva-tag [estado]="turno.estado" /></td>
+              <td>
+                @if (turno.estado === estados.ACTIVO && puedeRegistrarAsistencia()) {
+                  <div class="acciones-fila">
+                    <p-button
+                      label="Atendido"
+                      size="small"
+                      (onClick)="confirmarAsistencia(turno, estados.ATENDIDO)"
+                    />
+                    <p-button
+                      label="Ausente"
+                      size="small"
+                      severity="secondary"
+                      [outlined]="true"
+                      (onClick)="confirmarAsistencia(turno, estados.AUSENTE)"
+                    />
+                  </div>
+                } @else {
+                  <span class="subtitulo-pagina">Registrado</span>
+                }
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    }
+  </div>
+</div>
+
+<p-confirmdialog />

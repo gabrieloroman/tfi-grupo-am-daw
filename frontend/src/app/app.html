@@ -1,0 +1,59 @@
+@if (estaAutenticado()) {
+  <div class="disposicion">
+    <aside class="lateral" [class.lateral-abierta]="menuAbierto()">
+      <div class="marca">
+        <span class="monograma">AM</span>
+        <span class="marca-texto">
+          <strong>Clínica Médica AM</strong>
+          <small>Gestión de turnos</small>
+        </span>
+      </div>
+
+      <nav class="menu">
+        <p class="menu-rotulo">Secciones</p>
+        @for (entrada of entradas(); track entrada.ruta) {
+          <a
+            [routerLink]="entrada.ruta"
+            routerLinkActive="activo"
+            class="menu-enlace"
+            (click)="cerrarMenu()"
+          >
+            {{ entrada.texto }}
+          </a>
+        }
+      </nav>
+
+      <div class="pie-lateral">
+        <div class="identificacion">
+          <span class="avatar">{{ iniciales() }}</span>
+          <span class="identificacion-datos">
+            <strong>{{ usuario()?.nombres }} {{ usuario()?.apellidos }}</strong>
+            <small>{{ rolLegible() }}</small>
+          </span>
+        </div>
+        <button type="button" class="boton-salir" (click)="cerrarSesion()">
+          Cerrar sesion
+        </button>
+      </div>
+    </aside>
+
+    <div class="area-contenido">
+      <button
+        type="button"
+        class="boton-menu"
+        (click)="alternarMenu()"
+        aria-label="Abrir menú"
+      >
+        <span></span><span></span><span></span>
+      </button>
+
+      <main>
+        <router-outlet />
+      </main>
+    </div>
+  </div>
+} @else {
+  <router-outlet />
+}
+
+<p-toast />

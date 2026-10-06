@@ -1,0 +1,66 @@
+<div class="pantalla">
+  <section class="columna-marca">
+    <div class="marca-bloque">
+      <span class="monograma-grande">AM</span>
+      <h1>Clínica Médica AM</h1>
+      <p class="bajada">Sistema de gestión de turnos médicos</p>
+    </div>
+
+    <dl class="datos-servicio">
+      <div>
+        <dt>Horario de atención</dt>
+        <dd>8hs a 16hs</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="columna-acceso">
+    <div class="caja-acceso">
+      <p class="rotulo">Acceso al sistema</p>
+      <h2>Ingresar</h2>
+      <p class="indicacion">
+        Usa el numero de documento con el que figuras registrado.
+      </p>
+
+      <form [formGroup]="formulario" (ngSubmit)="iniciarSesion()" novalidate>
+        <div class="campo">
+          <label for="documento">Documento</label>
+          <input
+            id="documento"
+            pInputText
+            formControlName="documento"
+            inputmode="numeric"
+            autocomplete="username"
+            placeholder="Sin puntos ni espacios"
+          />
+          @if (documento.touched && documento.invalid) {
+            <small class="texto-error">Ingresa un número de documento válido</small>
+          }
+        </div>
+
+        <div class="campo">
+          <label for="clave">Contraseña</label>
+          <p-password
+            inputId="clave"
+            formControlName="clave"
+            [feedback]="false"
+            [toggleMask]="true"
+            autocomplete="current-password"
+            styleClass="ancho-total"
+            [inputStyle]="{ width: '100%' }"
+          />
+          @if (clave.touched && clave.invalid) {
+            <small class="texto-error">Ingresa tu contraseña</small>
+          }
+        </div>
+
+        <p-button
+          type="submit"
+          label="Ingresar"
+          [loading]="enviando()"
+          styleClass="ancho-total"
+        />
+      </form>
+    </div>
+  </section>
+</div>
