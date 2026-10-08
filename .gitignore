@@ -3,6 +3,7 @@ dist
 **/dist
 **/node_modules
 .env
+CLAUDE.md
 
 logs
 **.log
