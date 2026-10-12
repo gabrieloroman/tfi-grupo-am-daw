@@ -8,8 +8,7 @@ import { MedicosService } from "../services/medicos.service.js";
 @Controller('medicos')
 export class MedicosController {
 
-       
-    constructor(private readonly service: MedicosService) { } // (hz) Se inyecta el service para poder listar los médicos
+    constructor(private readonly service: MedicosService) { }
 
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
@@ -23,7 +22,7 @@ export class MedicosController {
     @ApiOkResponse({ type: MedicoDTO, isArray: true })
     @Get()
     async obtenerMedicos(): Promise<MedicoDTO[]> {
-        return await this.service.listar();// (hz) Devuelve la lista de médicos (la usa el paciente para reservar)
+        return await this.service.listar();
     }
 
 }
