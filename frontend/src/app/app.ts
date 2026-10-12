@@ -32,6 +32,12 @@ export class App {
       case RolesEnum.MEDICO:
         return [{ ruta: '/medico/agenda', texto: 'Agenda del día' }];
 
+      case RolesEnum.PACIENTE:
+        return [
+          { ruta: '/paciente/mis-turnos', texto: 'Mis turnos' },
+          { ruta: '/paciente/reservar', texto: 'Reservar turno' },
+        ];
+
       default:
         return [];
     }
