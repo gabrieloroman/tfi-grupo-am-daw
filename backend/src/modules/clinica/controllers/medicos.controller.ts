@@ -3,11 +3,12 @@ import { UpdateValorConsultaDto } from "../dtos/input/update-valor-consulta.dto.
 import { ApiBearerAuth, ApiOkResponse } from "@nestjs/swagger";
 import { AuthGuard } from "../../auth/guards/auth.guard.js";
 import { MedicoDTO } from "../dtos/output/medico.dto.js";
+import { MedicosService } from "../services/medicos.service.js";
 
 @Controller('medicos')
 export class MedicosController {
 
-    constructor() { }
+    constructor(private readonly service: MedicosService) { }
 
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
@@ -21,7 +22,7 @@ export class MedicosController {
     @ApiOkResponse({ type: MedicoDTO, isArray: true })
     @Get()
     async obtenerMedicos(): Promise<MedicoDTO[]> {
-        throw new NotImplementedException();
+        return await this.service.listar();
     }
 
 }
