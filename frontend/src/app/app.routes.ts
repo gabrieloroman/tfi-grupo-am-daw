@@ -24,6 +24,25 @@ export const routes: Routes = [
     ],
   },
 
+     // (hz) Rutas del paciente: solo entran usuarios con rol PACIENTE
+  {
+    path: 'paciente',
+    canActivate: [authGuard, rolGuard(RolesEnum.PACIENTE)],
+    children: [
+      {
+        path: 'mis-turnos',
+        title: 'Mis turnos - Clínica Médica AM',
+        loadComponent: () => import('./reservas/mis-turnos/mis-turnos').then((m) => m.MisTurnos),
+      },
+      {
+        path: 'reservar',
+        title: 'Reservar turno - Clínica Médica AM',
+        loadComponent: () => import('./reservas/reservar-turno/reservar-turno').then((m) => m.ReservarTurno),
+      },
+      { path: '', redirectTo: 'mis-turnos', pathMatch: 'full' },
+    ],
+  },
+
   {
     path: 'sin-permisos',
     title: 'Sin permisos',

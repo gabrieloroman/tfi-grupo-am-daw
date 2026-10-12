@@ -1,0 +1,73 @@
+<!-- (hz) Pantalla del paciente: Reservar turno -->
+<div class="contenedor">
+    <h1 class="titulo-pagina">Reservar turno</h1>
+    <p class="subtitulo-pagina">Elegí un médico, una fecha y un horario disponible (de 8 a 16 hs).</p>
+  
+    <div class="panel">
+      <div class="panel-encabezado">
+        <div class="campo">
+          <label for="medico">Médico</label>
+          <select id="medico" class="p-inputtext" (change)="elegirMedico($any($event.target).value)">
+            <option value="">Seleccioná un médico</option>
+            @for (medico of medicos(); track medico.id) {
+              <option [value]="medico.id">{{ medico.apellidos }} {{ medico.nombres }}</option>
+            }
+          </select>
+        </div>
+  
+        <div class="campo">
+          <label for="fecha">Fecha</label>
+          <input
+            id="fecha"
+            type="date"
+            pInputText
+            [min]="fechaMinima"
+            [max]="fechaMaxima"
+            [value]="fecha()"
+            (change)="elegirFecha($any($event.target).value)"
+          />
+        </div>
+  
+        <span class="separador-flexible"></span>
+  
+        <p-button
+          label="Volver"
+          severity="secondary"
+          [outlined]="true"
+          size="small"
+          routerLink="/paciente/mis-turnos"
+        />
+      </div>
+  
+      @if (!idMedico() || !fecha()) {
+        <div class="estado-vacio"><p>Seleccioná un médico y una fecha para ver los horarios.</p></div>
+      } @else if (cargandoHorarios()) {
+        <div class="estado-vacio"><p>Buscando horarios...</p></div>
+      } @else if (horarios().length === 0) {
+        <div class="estado-vacio"><p>No hay horarios disponibles para ese día.</p></div>
+      } @else {
+        <p class="subtitulo-pagina">Horarios disponibles:</p>
+        <div class="acciones-fila">
+          @for (horario of horarios(); track horario) {
+            <p-button
+              [label]="horario.slice(11, 16)"
+              size="small"
+              [outlined]="horarioElegido() !== horario"
+              (onClick)="horarioElegido.set(horario)"
+            />
+          }
+        </div>
+      }
+  
+      @if (horarioElegido(); as horario) {
+        <p>
+          Turno el <strong>{{ horario | date: 'dd/MM/yyyy' }}</strong> a las
+          <strong>{{ horario | date: 'HH:mm' }}</strong> con
+          <strong>{{ medicoElegido()?.apellidos }} {{ medicoElegido()?.nombres }}</strong>.
+          Valor de la consulta:
+          <strong>{{ medicoElegido()?.valorConsulta | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</strong>
+        </p>
+        <p-button label="Confirmar reserva" [loading]="enviando()" (onClick)="confirmar()" />
+      }
+    </div>
+  </div>

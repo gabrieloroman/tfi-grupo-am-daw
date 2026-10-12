@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { Medico } from "../entities/medico.entity.js";
@@ -33,6 +33,17 @@ export class MedicosService {
 
         if (!medico) {
             throw new ForbiddenException("El usuario no tiene un medico asociado");
+        }
+
+        return medico;
+    }
+
+    async buscarPorId(id: number): Promise<Medico> {
+
+        const medico = await this.repository.findOne({ where: { id } });
+
+        if (!medico) {
+            throw new NotFoundException("Medico no encontrado");
         }
 
         return medico;
