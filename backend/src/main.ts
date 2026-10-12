@@ -7,7 +7,12 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.use(helmet());
+  // upgrade-insecure-requests fuerza https en los recursos y deja Swagger en blanco al servir por http
+  app.use(
+    helmet({
+      contentSecurityPolicy: { directives: { upgradeInsecureRequests: null } },
+    }),
+  );
 
   const globalPrefix = 'api';
 

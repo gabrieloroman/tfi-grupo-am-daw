@@ -9,6 +9,10 @@ import { ReservaDTO } from "../dtos/output/reserva.dto.js";
 import { RolesUsuariosEnum } from "../enums/roles-usuarios.enum.js";
 import { AuthGuard } from "../../auth/guards/auth.guard.js";
 import { ReservasService } from "../services/reservas.service.js";
+import { DisponibilidadQueryDto } from "../dtos/input/disponibilidad-query.dto.js";
+import { HorariosDisponiblesDTO } from "../dtos/output/horarios-disponibles.dto.js";
+import { EstadosReservasEnum } from "../enums/estados-reservas.enum.js";
+
 
 type RequestAutenticado = Request & { usuario: { sub: number; rol: RolesUsuariosEnum } };
 
@@ -20,15 +24,22 @@ export class ReservasController {
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
     @Post()
-    async crearReserva(@Body() dto: CreateReservaDto): Promise<{ id: number }> {
-        throw new NotImplementedException();
+    // (hz) El paciente reserva un turno (el id del paciente sale del token)
+    async crearReserva(@Body() dto: CreateReservaDto, @Req() request: RequestAutenticado): Promise<{ id: number }> {
+        return await this.service.crear(request.usuario.sub, request.usuario.rol, dto);
     }
+    
 
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
     @Put(":id")
     async actualizarReserva(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateReservaDto, @Req() request: RequestAutenticado): Promise<void> {
-        await this.service.marcarAsistencia(request.usuario.sub, request.usuario.rol, id, dto.estado);
+        // (hz) Si el estado es CANCELADO, cancela; si no, el médico marca asistencia (igual que antes)
+        if (dto.estado === EstadosReservasEnum.CANCELADO) {
+            await this.service.cancelar(request.usuario.sub, request.usuario.rol, id);
+        } else {
+            await this.service.marcarAsistencia(request.usuario.sub, request.usuario.rol, id, dto.estado);
+        }
     }
 
     @UseGuards(AuthGuard)
@@ -38,6 +49,17 @@ export class ReservasController {
     async obtenerReservas(@Query() query: ListReservasQueryDto, @Req() request: RequestAutenticado): Promise<ListReservaDTO[]> {
         return await this.service.listar(request.usuario.sub, request.usuario.rol, query.fecha, query.estado);
     }
+
+    // (hz) Horarios libres de un médico en una fecha.
+    
+    @UseGuards(AuthGuard)
+    @ApiBearerAuth()
+    @ApiOkResponse({ type: HorariosDisponiblesDTO })
+    @Get("disponibilidad")
+    async obtenerDisponibilidad(@Query() query: DisponibilidadQueryDto): Promise<HorariosDisponiblesDTO> {
+        return await this.service.horariosDisponibles(Number(query.idMedico), query.fecha);
+    }
+
 
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
