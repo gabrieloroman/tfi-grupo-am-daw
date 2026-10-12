@@ -15,13 +15,13 @@ import { ReservasListadoApiClient } from './reservas-listado-api-client';
 
 type EstadoAsistencia = EstadosReservasEnum.ATENDIDO | EstadosReservasEnum.AUSENTE;
 
-function hoyEnFormatoIso(fecha: Date = new Date()): string {
+export function hoyEnFormatoIso(fecha: Date = new Date()): string {
   const mes = String(fecha.getMonth() + 1).padStart(2, '0');
   const dia = String(fecha.getDate()).padStart(2, '0');
   return `${fecha.getFullYear()}-${mes}-${dia}`;
 }
 
-function mensajeDeError(error: unknown, porDefecto: string): string {
+export function mensajeDeError(error: unknown, porDefecto: string): string {
   const detalle = (error as { error?: { message?: string | string[] } })?.error?.message;
 
   if (Array.isArray(detalle)) {
