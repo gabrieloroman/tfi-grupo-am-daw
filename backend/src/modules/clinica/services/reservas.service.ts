@@ -8,6 +8,8 @@ import { EstadosReservasEnum } from "../enums/estados-reservas.enum.js";
 import { RolesUsuariosEnum } from "../enums/roles-usuarios.enum.js";
 import { HorariosDisponiblesDTO } from "../dtos/output/horarios-disponibles.dto.js";
 import { CreateReservaDto } from "../dtos/input/create-reserva.dto.js";
+import { Usuario } from "../../auth/entities/usuario.entity.js";
+import { EstadosUsuariosEnum } from "../enums/estados-usuarios.enum.js";
 
 // (hz) Reglas de negocio del TP
 const HORA_APERTURA = 8;
@@ -19,7 +21,9 @@ const DIAS_MAXIMOS_ANTICIPACION = 30;
 export class ReservasService {
 
     constructor(@InjectRepository(Reserva) private readonly repository: Repository<Reserva>,
-        private readonly medicosService: MedicosService) { }
+        private readonly medicosService: MedicosService,
+        @InjectRepository(Usuario) private readonly usuarioRepository: Repository<Usuario>,//agrego reposit4----
+    ) { }
 
         async listar(idUsuario: number, rol: RolesUsuariosEnum, fecha?: string, estado?: EstadosReservasEnum): Promise<ListReservaDTO[]> {
 
@@ -37,10 +41,14 @@ export class ReservasService {
                 if (fecha) {
                     where.fechaHora = this.rangoDelDia(fecha);
                 }
-            } else {
-                throw new NotImplementedException(); // ADMINISTRADOR: lo implementa otro integrante
+            } else if (rol=== RolesUsuariosEnum.ADMINISTRADOR){ //Agrego Administrador 4-----------------------
+                if(fecha){
+                     where.fechaHora = this.rangoDelDia(fecha);
+                }
+            } else {   
+                throw new NotImplementedException(); 
             }
-    
+            //---------------------------------
             if (estado) {
                 where.estado = estado;
             }
@@ -64,8 +72,21 @@ export class ReservasService {
 
         // (hz) El paciente reserva un turno para sí mismo
         async crear(idUsuario: number, rol: RolesUsuariosEnum, dto: CreateReservaDto): Promise<{ id: number }> {
+            let idPacienteAUsar = idUsuario;//agrego variable----
+            if (rol === RolesUsuariosEnum.ADMINISTRADOR){
+                if (!dto.idPaciente){
+                    throw new BadRequestException("El administrador debe indicar el id del paciente");
+                }
+                // validamos que el paciente exista, sea rol paciente y este activo
+                const paciente = await this.usuarioRepository.findOne({
+                    where: {id: dto.idPaciente,rol: RolesUsuariosEnum.PACIENTE}
+                });
+                if(!paciente || paciente.estado !== EstadosUsuariosEnum.ACTIVO){
+                    throw new BadRequestException("El paciente no existe o no esta activo");
+                }
+                idPacienteAUsar = dto.idPaciente;
 
-            if (rol !== RolesUsuariosEnum.PACIENTE) {
+            } else if (rol !== RolesUsuariosEnum.PACIENTE) {
                 throw new NotImplementedException(); // ADMINISTRADOR: lo implementa otro integrante (usa dto.idPaciente)
             }
     
@@ -85,7 +106,7 @@ export class ReservasService {
     
             const reserva = this.repository.create({
                 idMedico: medico.id,
-                idPaciente: idUsuario,
+                idPaciente: idPacienteAUsar,//---cambio idUsuario por esto-----
                 fechaHora,
                 estado: EstadosReservasEnum.ACTIVO,
                 valorConsulta: medico.valorConsulta, // Regla: se congela el valor al momento de reservar
