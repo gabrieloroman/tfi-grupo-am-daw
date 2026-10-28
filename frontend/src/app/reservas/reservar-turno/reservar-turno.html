@@ -71,3 +71,21 @@
       }
     </div>
   </div>
+  <!----nuevo--->
+  
+<!-- Selector de paciente para el administrador -->
+<div class="campo">
+  <label for="idPaciente">Paciente</label>
+  <select
+    id="idPaciente"
+    class="p-inputtext"
+    (change)="elegirPaciente($any($event.target).value)"
+  >
+    <option value="">Seleccioná un paciente</option>
+    @for (p of pacientes(); track p.id) {
+      <option [value]="p.id">
+        {{ p.apellidos }} {{ p.nombres }}
+      </option>
+    }
+  </select>
+</div>

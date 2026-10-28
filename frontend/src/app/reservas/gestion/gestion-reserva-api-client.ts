@@ -8,6 +8,7 @@ import { EstadosReservasEnum } from '../estados-reservas-enum';
 export interface CrearReservaDTO {
   idMedico: number;
   fechaHora: string;
+  idPaciente?:number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -30,4 +31,10 @@ export class GestionReservaApiClient {
   crear(dto: CrearReservaDTO): Observable<{ id: number }> {
     return this.http.post<{ id: number }>('/api/v1/reservas', dto);
   }
+
+  //nuevo
+  obtenerPacientesActivos() {
+  return this.http.get<any[]>('/api/v1/reservas/pacientes-activos');
+}
+
 }

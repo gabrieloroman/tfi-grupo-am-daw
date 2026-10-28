@@ -40,7 +40,13 @@ export class ReservarTurno {
   protected readonly cargandoHorarios = signal(false);
   protected readonly enviando = signal(false);
 
-  // El médico elegido en el desplegable (para mostrar nombre y valor)
+  //--------nuevo: señales para los pacientes activos-------------------------
+
+  protected readonly pacientes = signal<any[]>([]);
+  protected readonly idPacienteSeleccionado = signal<number | null>(null);
+
+  
+ // El médico elegido en el desplegable (para mostrar nombre y valor)
   protected readonly medicoElegido = computed(() =>
     this.medicos().find((medico) => medico.id === this.idMedico()),
   );
@@ -55,11 +61,29 @@ export class ReservarTurno {
           detail: mensajeDeError(err, 'No se pudieron cargar los médicos'),
         }),
     });
-  }
+    //----Cargar pacinetes activos para el admin
+
+
+
+    this.gestionReservaApiClient.obtenerPacientesActivos().subscribe({
+      next: (pacientes) =>this.pacientes.set(pacientes),
+      error: (err) =>
+        this.mensajes.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: mensajeDeError(err, 'No se pudieron cargar los pacientes activos'),
+        })
+    })
+
+}
 
   protected elegirMedico(valor: string): void {
     this.idMedico.set(valor ? Number(valor) : null);
     this.buscarHorarios();
+  }
+  
+  protected elegirPaciente(valor: string): void {
+    this.idPacienteSeleccionado.set(valor ? Number(valor) : null);
   }
 
   protected elegirFecha(valor: string): void {
@@ -103,10 +127,18 @@ export class ReservarTurno {
     }
 
     this.enviando.set(true);
-    this.gestionReservaApiClient.crear({ idMedico, fechaHora }).subscribe({
+
+    const idPaciente = this.idPacienteSeleccionado();
+const dto = idPaciente
+  ? { idMedico, fechaHora, idPaciente }
+  : { idMedico, fechaHora };
+    this.gestionReservaApiClient.crear(dto).subscribe({
       next: () => {
         this.mensajes.add({ severity: 'success', summary: 'Listo', detail: 'Turno reservado' });
-        void this.router.navigateByUrl('/paciente/mis-turnos');
+         const destino = this.router.url.startsWith('/admin')
+          ? '/admin/reservar'
+          : '/paciente/mis-turnos';
+        void this.router.navigateByUrl('destino');
       },
       error: (err) => {
         this.enviando.set(false);

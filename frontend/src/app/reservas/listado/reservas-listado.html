@@ -2,7 +2,7 @@
   <h1 class="titulo-pagina">Agenda del día</h1>
   <p class="subtitulo-pagina">
     Turnos asignados para la fecha seleccionada.
-    @if (cantidadPendientes() > 0) {
+    @if (cantidadPendientes() > 0 && puedeRegistrarAsistencia()) {
       Quedan {{ cantidadPendientes() }} sin registrar asistencia.
     }
   </p>
@@ -79,7 +79,9 @@
                       (onClick)="confirmarAsistencia(turno, estados.AUSENTE)"
                     />
                   </div>
-                } @else {
+                } @else if (turno.estado === estados.ACTIVO) {
+                  <span class="subtitulo-pagina">Pendiente</span>
+                } @else if (turno.estado !== estados.CANCELADO) {
                   <span class="subtitulo-pagina">Registrado</span>
                 }
               </td>
