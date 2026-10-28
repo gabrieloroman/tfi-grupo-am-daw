@@ -5,7 +5,9 @@ import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 
-import { GestionReservaApiClient } from '../gestion/gestion-reserva-api-client';
+import { AuthStore } from '../../auth/auth-store';
+import { RolesEnum } from '../../auth/roles-enum';
+import { GestionReservaApiClient, type PacienteDTO } from '../gestion/gestion-reserva-api-client';
 import { hoyEnFormatoIso, mensajeDeError } from '../listado/reservas-listado';
 import { type MedicoDTO, ReservarTurnoApiClient } from './reservar-turno-api-client';
 
@@ -27,6 +29,7 @@ export class ReservarTurno {
   private readonly gestionReservaApiClient = inject(GestionReservaApiClient);
   private readonly mensajes = inject(MessageService);
   private readonly router = inject(Router);
+  private readonly authStore = inject(AuthStore);
 
   // Límites del calendario: desde hoy hasta 30 días (regla del TP)
   protected readonly fechaMinima = hoyEnFormatoIso();
@@ -42,7 +45,8 @@ export class ReservarTurno {
 
   //--------nuevo: señales para los pacientes activos-------------------------
 
-  protected readonly pacientes = signal<any[]>([]);
+  protected readonly esAdministrador = computed(() => this.authStore.rol() === RolesEnum.ADMINISTRADOR);
+  protected readonly pacientes = signal<PacienteDTO[]>([]);
   protected readonly idPacienteSeleccionado = signal<number | null>(null);
 
   
@@ -64,6 +68,11 @@ export class ReservarTurno {
     //----Cargar pacinetes activos para el admin
 
 
+
+    // (jt) Solo el administrador puede pedir la lista de pacientes
+    if (!this.esAdministrador()) {
+      return;
+    }
 
     this.gestionReservaApiClient.obtenerPacientesActivos().subscribe({
       next: (pacientes) =>this.pacientes.set(pacientes),

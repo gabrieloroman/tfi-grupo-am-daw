@@ -11,6 +11,14 @@ export interface CrearReservaDTO {
   idPaciente?:number;
 }
 
+// (jt) Paciente tal como lo devuelve GET /reservas/pacientes-activos (solo administrador)
+export interface PacienteDTO {
+  id: number;
+  nombres: string;
+  apellidos: string;
+  documento: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GestionReservaApiClient {
   private readonly http = inject(HttpClient);
@@ -33,8 +41,8 @@ export class GestionReservaApiClient {
   }
 
   //nuevo
-  obtenerPacientesActivos() {
-  return this.http.get<any[]>('/api/v1/reservas/pacientes-activos');
-}
+  obtenerPacientesActivos(): Observable<PacienteDTO[]> {
+    return this.http.get<PacienteDTO[]>('/api/v1/reservas/pacientes-activos');
+  }
 
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotImplementedException, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, Get, NotImplementedException, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
 import { CreateReservaDto } from "../dtos/input/create-reserva.dto.js";
 import { UpdateReservaDto } from "../dtos/input/update-reserva.dto.js";
@@ -13,6 +13,7 @@ import { DisponibilidadQueryDto } from "../dtos/input/disponibilidad-query.dto.j
 import { HorariosDisponiblesDTO } from "../dtos/output/horarios-disponibles.dto.js";
 import { EstadosReservasEnum } from "../enums/estados-reservas.enum.js";
 import { UsuariosService } from "../../auth/services/usuarios.service.js";
+import { PacienteDTO } from "../dtos/output/paciente.dto.js";
 
 
 type RequestAutenticado = Request & { usuario: { sub: number; rol: RolesUsuariosEnum } };
@@ -64,10 +65,15 @@ export class ReservasController {
         return await this.service.horariosDisponibles(Number(query.idMedico), query.fecha);
     }
         // Nuevo endpoint: listar pacientes activos
+    // (jt) Solo para el administrador, que elige paciente al reservar
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
+    @ApiOkResponse({ type: PacienteDTO, isArray: true })
     @Get("pacientes-activos")
-    async obtenerPacientesActivos() {
+    async obtenerPacientesActivos(@Req() request: RequestAutenticado): Promise<PacienteDTO[]> {
+        if (request.usuario.rol !== RolesUsuariosEnum.ADMINISTRADOR) {
+            throw new ForbiddenException("Solo el administrador puede listar pacientes");
+        }
         return await this.usuariosService.listarPacientesActivos();
     }
 
