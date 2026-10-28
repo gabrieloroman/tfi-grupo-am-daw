@@ -42,7 +42,20 @@ export const routes: Routes = [
       { path: '', redirectTo: 'mis-turnos', pathMatch: 'full' },
     ],
   },
-
+   {
+  path: 'admin',
+  canActivate: [authGuard, rolGuard(RolesEnum.ADMINISTRADOR)],
+  children: [
+    {
+      path: 'reservar',
+      title: 'Reservar turno - Administrador',
+      loadComponent: () =>
+        import('./reservas/reservar-turno/reservar-turno')
+          .then((m) => m.ReservarTurno),
+    },
+    { path: '', redirectTo: 'reservar', pathMatch: 'full' },
+  ],
+},
   {
     path: 'sin-permisos',
     title: 'Sin permisos',
