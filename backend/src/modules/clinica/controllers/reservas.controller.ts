@@ -12,6 +12,7 @@ import { ReservasService } from "../services/reservas.service.js";
 import { DisponibilidadQueryDto } from "../dtos/input/disponibilidad-query.dto.js";
 import { HorariosDisponiblesDTO } from "../dtos/output/horarios-disponibles.dto.js";
 import { EstadosReservasEnum } from "../enums/estados-reservas.enum.js";
+import { UsuariosService } from "../../auth/services/usuarios.service.js";
 
 
 type RequestAutenticado = Request & { usuario: { sub: number; rol: RolesUsuariosEnum } };
@@ -19,7 +20,10 @@ type RequestAutenticado = Request & { usuario: { sub: number; rol: RolesUsuarios
 @Controller('reservas')
 export class ReservasController {
 
-    constructor(private readonly service: ReservasService) { }
+    constructor(private readonly service: ReservasService,
+        private readonly usuariosService: UsuariosService        //<---inyeccion del servicio de usuarios-->
+        
+    ) { }
 
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
@@ -59,8 +63,15 @@ export class ReservasController {
     async obtenerDisponibilidad(@Query() query: DisponibilidadQueryDto): Promise<HorariosDisponiblesDTO> {
         return await this.service.horariosDisponibles(Number(query.idMedico), query.fecha);
     }
+        // Nuevo endpoint: listar pacientes activos
+    @UseGuards(AuthGuard)
+    @ApiBearerAuth()
+    @Get("pacientes-activos")
+    async obtenerPacientesActivos() {
+        return await this.usuariosService.listarPacientesActivos();
+    }
 
-
+    // Obtener una reserva por ID
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
     @ApiOkResponse({ type: ReservaDTO })
@@ -68,5 +79,6 @@ export class ReservasController {
     async obtenerReserva(@Param("id") id: number): Promise<ReservaDTO> {
         throw new NotImplementedException();
     }
-
 }
+
+    
