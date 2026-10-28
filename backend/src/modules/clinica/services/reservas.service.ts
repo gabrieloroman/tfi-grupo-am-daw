@@ -118,33 +118,39 @@ export class ReservasService {
         }
     
         // (hz) El paciente cancela un turno propio, solo hasta el día anterior a la consulta
+        // (jt) El administrador cancela cualquier turno, hasta el momento en que inicia la consulta
         async cancelar(idUsuario: number, rol: RolesUsuariosEnum, id: number): Promise<void> {
-    
-            if (rol !== RolesUsuariosEnum.PACIENTE) {
-                throw new NotImplementedException(); // ADMINISTRADOR: lo implementa otro integrante
+
+            if (rol !== RolesUsuariosEnum.PACIENTE && rol !== RolesUsuariosEnum.ADMINISTRADOR) {
+                throw new ForbiddenException("Solo un paciente o un administrador puede cancelar una reserva");
             }
-    
+
             const reserva = await this.repository.findOne({ where: { id } });
-    
+
             if (!reserva) {
                 throw new NotFoundException("Reserva no encontrada");
             }
-    
-            if (reserva.idPaciente !== idUsuario) {
+
+            if (rol === RolesUsuariosEnum.PACIENTE && reserva.idPaciente !== idUsuario) {
                 throw new ForbiddenException("La reserva pertenece a otro paciente");
             }
-    
+
             if (reserva.estado !== EstadosReservasEnum.ACTIVO) {
                 throw new ConflictException("Solo se puede cancelar una reserva en estado ACTIVO");
             }
-    
+
             const ahora = new Date();
-            const inicioDeManana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1);
-    
-            if (reserva.fechaHora < inicioDeManana) {
-                throw new BadRequestException("Solo se puede cancelar un turno hasta el dia anterior a la consulta");
+
+            if (rol === RolesUsuariosEnum.PACIENTE) {
+                const inicioDeManana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1);
+
+                if (reserva.fechaHora < inicioDeManana) {
+                    throw new BadRequestException("Solo se puede cancelar un turno hasta el dia anterior a la consulta");
+                }
+            } else if (reserva.fechaHora <= ahora) {
+                throw new BadRequestException("Solo se puede cancelar un turno hasta el momento en que inicia la consulta");
             }
-    
+
             reserva.estado = EstadosReservasEnum.CANCELADO;
     
             await this.repository.save(reserva);
