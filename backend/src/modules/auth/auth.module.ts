@@ -21,7 +21,7 @@ import { AuthGuard } from "./guards/auth.guard.js";
     ],
     controllers: [LoginController],
     providers: [UsuariosService, AuthService, AuthGuard],
-    exports: [AuthGuard]
+    exports: [AuthGuard,UsuariosService]
 })
 export class AuthModule {
 
