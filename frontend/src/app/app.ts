@@ -38,6 +38,14 @@ export class App {
           { ruta: '/paciente/reservar', texto: 'Reservar turno' },
         ];
 
+      // --- AGREGAMOS EL CASO ADMINISTRADOR ---
+      case RolesEnum.ADMINISTRADOR:
+        return [
+          { ruta: '/admin/turnos', texto: 'Listado de turnos' },
+          { ruta: '/admin/reservar', texto: 'Reservar turno' },
+          { ruta: '/admin/valor-consulta', texto: 'Valor de consulta' },
+        ];
+
       default:
         return [];
     }

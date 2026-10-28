@@ -1,0 +1,100 @@
+<section class="p-4">
+  <h1>Listado de turnos</h1>
+  <p>Consultá y filtrá los turnos registrados en el sistema.</p>
+
+  <div class="flex flex-wrap items-end gap-3 mb-4">
+    <div>
+      <label for="fecha">Fecha del turno</label>
+      <input
+        id="fecha"
+        type="date"
+        pInputText
+        [ngModel]="fecha()"
+        (ngModelChange)="fecha.set($event)"
+      />
+    </div>
+
+    <div>
+      <label for="estado">Estado del turno</label>
+      <select
+        id="estado"
+        class="p-inputtext"
+        [ngModel]="estado()"
+        (ngModelChange)="estado.set($event)"
+      >
+        <option value="">Todos los estados</option>
+        <option [value]="estados.ACTIVO">Activo</option>
+        <option [value]="estados.ATENDIDO">Atendido</option>
+        <option [value]="estados.AUSENTE">Ausente</option>
+        <option [value]="estados.CANCELADO">Cancelado</option>
+      </select>
+    </div>
+
+    <button
+      type="button"
+      pButton
+      label="Buscar"
+      (click)="cargar()"
+    ></button>
+
+    <button
+      type="button"
+      pButton
+      label="Limpiar filtros"
+      severity="secondary"
+      (click)="limpiarFiltros()"
+    ></button>
+  </div>
+
+  @if (cargando()) {
+    <p>Cargando turnos...</p>
+  } @else {
+    <p>Turnos encontrados: {{ turnos().length }}</p>
+
+    <p-table
+      [value]="turnos()"
+      [tableStyle]="{ 'min-width': '65rem' }"
+      stripedRows
+      showGridlines
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10, 20, 50]"
+    >
+      <ng-template #header>
+        <tr>
+          <th>Fecha y hora</th>
+          <th>Paciente</th>
+          <th>Documento</th>
+          <th>Médico</th>
+          <th>Valor de consulta</th>
+          <th>Estado</th>
+          <th>Acciones</th> 
+        </tr>
+      </ng-template>
+
+      <ng-template #body let-turno>
+        <tr>
+          <td>{{ turno.fechaHora | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ turno.paciente }}</td>
+          <td>{{ turno.documentoPaciente }}</td>
+          <td>{{ turno.medico }}</td>
+          <td>{{ turno.valorConsulta | currency: 'ARS' }}</td>
+          <td>{{ turno.estado }}</td>
+          
+          <td>
+            @if (turno.estado === estados.ACTIVO) {
+               <!-- ACÁ ESTÁ EL BOTÓN CAMBIADO A HTML NATIVO -->
+               <button
+                type="button"
+                class="btn-cancelar"
+                (click)="cancelar(turno.id)"
+              >
+                Cancelar
+              </button>
+            }
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  }
+</section>

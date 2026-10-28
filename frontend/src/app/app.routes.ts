@@ -24,7 +24,6 @@ export const routes: Routes = [
     ],
   },
 
-     // (hz) Rutas del paciente: solo entran usuarios con rol PACIENTE
   {
     path: 'paciente',
     canActivate: [authGuard, rolGuard(RolesEnum.PACIENTE)],
@@ -42,20 +41,30 @@ export const routes: Routes = [
       { path: '', redirectTo: 'mis-turnos', pathMatch: 'full' },
     ],
   },
-   {
-  path: 'admin',
-  canActivate: [authGuard, rolGuard(RolesEnum.ADMINISTRADOR)],
-  children: [
-    {
-      path: 'reservar',
-      title: 'Reservar turno - Administrador',
-      loadComponent: () =>
-        import('./reservas/reservar-turno/reservar-turno')
-          .then((m) => m.ReservarTurno),
-    },
-    { path: '', redirectTo: 'reservar', pathMatch: 'full' },
-  ],
-},
+
+  // --- RUTAS DEL ADMINISTRADOR ---
+  {
+    path: 'admin',
+    canActivate: [authGuard, rolGuard(RolesEnum.ADMINISTRADOR)],
+    children: [
+      {
+        path: 'reservar',
+        title: 'Reservar turno - Administrador',
+        loadComponent: () =>
+          import('./reservas/reservar-turno/reservar-turno')
+            .then((m) => m.ReservarTurno),
+      },
+      {
+        path: 'turnos',
+        title: 'Listado de turnos - Administrador',
+        loadComponent: () =>
+          import('./reservas/listado/admin-listado') // <- OJO: Verificá que el archivo esté en esta ruta
+            .then((m) => m.ListadoAdmin),
+      },
+      { path: '', redirectTo: 'turnos', pathMatch: 'full' }, // Ahora entra directo al listado
+    ],
+  },
+
   {
     path: 'sin-permisos',
     title: 'Sin permisos',
