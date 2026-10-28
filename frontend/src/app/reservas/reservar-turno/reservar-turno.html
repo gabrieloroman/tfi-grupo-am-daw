@@ -74,6 +74,8 @@
   <!----nuevo--->
   
 <!-- Selector de paciente para el administrador -->
+<!-- (jt) Solo lo ve el administrador: el paciente reserva siempre para sí mismo -->
+@if (esAdministrador()) {
 <div class="campo">
   <label for="idPaciente">Paciente</label>
   <select
@@ -84,8 +86,9 @@
     <option value="">Seleccioná un paciente</option>
     @for (p of pacientes(); track p.id) {
       <option [value]="p.id">
-        {{ p.apellidos }} {{ p.nombres }}
+        {{ p.apellidos }} {{ p.nombres }} ({{ p.documento }})
       </option>
     }
   </select>
 </div>
+}
