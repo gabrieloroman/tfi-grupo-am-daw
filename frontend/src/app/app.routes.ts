@@ -62,6 +62,13 @@ export const routes: Routes = [
             .then((m) => m.ListadoAdmin),
       },
       { path: '', redirectTo: 'turnos', pathMatch: 'full' }, // Ahora entra directo al listado
+      {
+        path: 'valor-consulta',
+        title: 'Valores de consulta - Administrador',
+        loadComponent: () =>
+          import('./reservas/valor-consulta/valor-consulta')
+            .then((m) => m.ValorConsulta),
+      },
     ],
   },
 
