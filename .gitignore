@@ -60,3 +60,5 @@ lerna-debug.log*
 **/documentation
 .vscode
 **/*.tsbuildinfo
+
+/backend/bruno/

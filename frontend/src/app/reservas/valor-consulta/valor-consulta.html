@@ -1,0 +1,53 @@
+<section>
+    <h1>Gestionar valores de consulta</h1>
+
+    <p>Consultá y actualizá el importe de cada médico.</p>
+
+    @if (cargando) {
+    <p>Cargando médicos...</p>
+    }
+
+    @if (error) {
+    <p>{{ error }}</p>
+    }
+
+    @if (mensaje) {
+    <p>{{ mensaje }}</p>
+    }
+
+    @if (!cargando && medicos.length > 0) {
+    <table>
+        <thead>
+            <tr>
+                <th>Médico</th>
+                <th>Matrícula</th>
+                <th>Valor actual</th>
+                <th>Nuevo valor</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @for (medico of medicos; track medico.id) {
+            <tr>
+                <td>{{ medico.apellidos }}, {{ medico.nombres }}</td>
+                <td>{{ medico.matricula }}</td>
+                <td>{{ medico.valorConsulta }}</td>
+                <td>
+                    <input type="number" min="1" step="1" [(ngModel)]="valores[medico.id]" />
+                </td>
+                <td>
+                    <button type="button" (click)="guardar(medico)" [disabled]="guardando !== null">
+                        {{ guardando === medico.id ? 'Guardando...' : 'Guardar' }}
+                    </button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+    }
+
+    @if (!cargando && medicos.length === 0) {
+    <p>No hay médicos para mostrar.</p>
+    }
+</section>

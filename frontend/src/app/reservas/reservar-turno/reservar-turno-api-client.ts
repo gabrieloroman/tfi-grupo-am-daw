@@ -30,4 +30,14 @@ export class ReservarTurnoApiClient {
     const params = new HttpParams().set('idMedico', idMedico).set('fecha', fecha);
     return this.http.get<HorariosDisponiblesDTO>('/api/v1/reservas/disponibilidad', { params });
   }
+
+  actualizarValorConsulta(
+    idMedico: number,
+    valorConsulta: number,
+  ): Observable<void> {
+    return this.http.put<void>(
+      `/api/v1/medicos/${idMedico}/valor-consulta`,
+      { valorConsulta },
+    );
+  }
 }
