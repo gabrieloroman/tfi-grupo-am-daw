@@ -1,11 +1,11 @@
-import { Body, Controller, ForbiddenException, Get, NotImplementedException, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
 import { CreateReservaDto } from "../dtos/input/create-reserva.dto.js";
 import { UpdateReservaDto } from "../dtos/input/update-reserva.dto.js";
 import { ListReservasQueryDto } from "../dtos/input/list-reservas-query.dto.js";
-import { ApiBearerAuth, ApiOkResponse } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse } from "@nestjs/swagger";
 import { ListReservaDTO } from "../dtos/output/list-reserva.dto.js";
-import { ReservaDTO } from "../dtos/output/reserva.dto.js";
+import { ReservaCreadaDTO } from "../dtos/output/reserva-creada.dto.js";
 import { RolesUsuariosEnum } from "../enums/roles-usuarios.enum.js";
 import { AuthGuard } from "../../auth/guards/auth.guard.js";
 import { ReservasService } from "../services/reservas.service.js";
@@ -28,15 +28,18 @@ export class ReservasController {
 
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
+    @ApiCreatedResponse({ type: ReservaCreadaDTO })
     @Post()
     // (hz) El paciente reserva un turno (el id del paciente sale del token)
-    async crearReserva(@Body() dto: CreateReservaDto, @Req() request: RequestAutenticado): Promise<{ id: number }> {
+    // (jt) El administrador reserva para el paciente que indica en idPaciente
+    async crearReserva(@Body() dto: CreateReservaDto, @Req() request: RequestAutenticado): Promise<ReservaCreadaDTO> {
         return await this.service.crear(request.usuario.sub, request.usuario.rol, dto);
     }
-    
+
 
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
+    @ApiOkResponse({ description: "Reserva cancelada (paciente o administrador) o asistencia registrada (médico)" })
     @Put(":id")
     async actualizarReserva(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateReservaDto, @Req() request: RequestAutenticado): Promise<void> {
         // (hz) Si el estado es CANCELADO, cancela; si no, el médico marca asistencia (igual que antes)
@@ -76,15 +79,4 @@ export class ReservasController {
         }
         return await this.usuariosService.listarPacientesActivos();
     }
-
-    // Obtener una reserva por ID
-    @UseGuards(AuthGuard)
-    @ApiBearerAuth()
-    @ApiOkResponse({ type: ReservaDTO })
-    @Get(":id")
-    async obtenerReserva(@Param("id") id: number): Promise<ReservaDTO> {
-        throw new NotImplementedException();
-    }
 }
-
-    

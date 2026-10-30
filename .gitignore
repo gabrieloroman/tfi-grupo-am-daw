@@ -62,3 +62,6 @@ lerna-debug.log*
 **/*.tsbuildinfo
 
 /backend/bruno/
+
+# PM2: configuracion de produccion con claves (se versiona solo el .example)
+backend/ecosystem.config.json

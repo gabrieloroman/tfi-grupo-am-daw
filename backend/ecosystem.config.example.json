@@ -1,0 +1,21 @@
+{
+  "apps": [
+    {
+      "name": "clinica-backend",
+      "script": "dist/main.js",
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": 4000,
+        "DB_HOST": "localhost",
+        "DB_PORT": 5432,
+        "DB_USERNAME": "postgres",
+        "DB_PASSWORD": "la_clave_de_tu_postgres",
+        "DB_NAME": "clinica_turnos",
+        "DB_LOGGING": "false",
+        "SWAGGER_HABILITADO": false,
+        "JWT_SECRET": "clave_ejemplo"
+      },
+      "time": true
+    }
+  ]
+}

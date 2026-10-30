@@ -21,6 +21,7 @@ export class MedicosController {
 
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
+    @ApiOkResponse({ description: "Valor de consulta actualizado (solo administrador)" })
     @Put(":id/valor-consulta")
     async actualizarValorConsulta(
         @Param("id", ParseIntPipe) id: number, 
