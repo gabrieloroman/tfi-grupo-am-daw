@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, NotImplementedException } from "@nestjs/common";
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Between, FindOptionsWhere, Repository,Not } from "typeorm";
 import { Reserva } from "../entities/reserva.entity.js";
@@ -8,6 +8,7 @@ import { EstadosReservasEnum } from "../enums/estados-reservas.enum.js";
 import { RolesUsuariosEnum } from "../enums/roles-usuarios.enum.js";
 import { HorariosDisponiblesDTO } from "../dtos/output/horarios-disponibles.dto.js";
 import { CreateReservaDto } from "../dtos/input/create-reserva.dto.js";
+import { ReservaCreadaDTO } from "../dtos/output/reserva-creada.dto.js";
 import { Usuario } from "../../auth/entities/usuario.entity.js";
 import { EstadosUsuariosEnum } from "../enums/estados-usuarios.enum.js";
 
@@ -45,8 +46,8 @@ export class ReservasService {
                 if(fecha){
                      where.fechaHora = this.rangoDelDia(fecha);
                 }
-            } else {   
-                throw new NotImplementedException(); 
+            } else {
+                throw new ForbiddenException("El rol del usuario no puede listar reservas");
             }
             //---------------------------------
             if (estado) {
@@ -71,7 +72,8 @@ export class ReservasService {
         }
 
         // (hz) El paciente reserva un turno para sí mismo
-        async crear(idUsuario: number, rol: RolesUsuariosEnum, dto: CreateReservaDto): Promise<{ id: number }> {
+        // El administrador reserva para el paciente que indica en dto.idPaciente
+        async crear(idUsuario: number, rol: RolesUsuariosEnum, dto: CreateReservaDto): Promise<ReservaCreadaDTO> {
             let idPacienteAUsar = idUsuario;//agrego variable----
             if (rol === RolesUsuariosEnum.ADMINISTRADOR){
                 if (!dto.idPaciente){
@@ -87,7 +89,7 @@ export class ReservasService {
                 idPacienteAUsar = dto.idPaciente;
 
             } else if (rol !== RolesUsuariosEnum.PACIENTE) {
-                throw new NotImplementedException(); // ADMINISTRADOR: lo implementa otro integrante (usa dto.idPaciente)
+                throw new ForbiddenException("Solo un paciente o un administrador puede reservar turnos");
             }
     
             const fechaHora = new Date(dto.fechaHora);
@@ -186,10 +188,6 @@ export class ReservasService {
 
         if (rol !== RolesUsuariosEnum.MEDICO) {
             throw new ForbiddenException("Solo un medico puede modificar el estado de una reserva");
-        }
-
-        if (estado === EstadosReservasEnum.CANCELADO) {
-            throw new NotImplementedException();
         }
 
         if (estado !== EstadosReservasEnum.ATENDIDO && estado !== EstadosReservasEnum.AUSENTE) {
