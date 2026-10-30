@@ -82,19 +82,13 @@
           <td>{{ turno.estado }}</td>
           
           <td>
-            @if (turno.estado === estados.ACTIVO) {
-               <!-- ACÁ ESTÁ EL BOTÓN CAMBIADO A HTML NATIVO -->
-               <button
-                type="button"
-                class="btn-cancelar"
-                (click)="cancelar(turno.id)"
-              >
-                Cancelar
-              </button>
-            }
+            <!-- (jt) Aparece solo si el turno está ACTIVO y todavía no empezó; confirma y recarga -->
+            <app-cancelar-reserva-boton [turno]="turno" (cancelada)="cargar()" />
           </td>
         </tr>
       </ng-template>
     </p-table>
   }
 </section>
+
+<p-confirmdialog />
