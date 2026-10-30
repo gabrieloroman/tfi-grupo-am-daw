@@ -205,3 +205,140 @@ Las carga el script de la sección 1. El login es por documento.
 | 30303030 | paciente123 | Paciente (Torres) |
 | 40404040 | paciente123 | Paciente (Ruiz) |
 | 66666666 | paciente123 | Paciente dado de baja — no debe poder entrar |
+
+---
+
+## Documentación
+
+### Swagger
+
+Con el backend de desarrollo levantado (`SWAGGER_HABILITADO=true` en
+`backend/.env`), la API queda documentada en `http://localhost:3000/api`,
+con los DTOs de entrada y salida de cada endpoint. Para probar endpoints
+protegidos: hacer login en `POST /api/v1/auth`, copiar el `accessToken` y
+pegarlo en **Authorize**.
+
+En producción Swagger está apagado (ver la sección siguiente).
+
+### Compodoc
+
+```bash
+cd backend
+npm run compodoc
+```
+
+Queda en `http://localhost:8081`.
+
+```bash
+cd frontend
+npm run compodoc
+```
+
+Queda en `http://localhost:8082`.
+
+### Pruebas
+
+El checklist de pruebas manuales entre roles está en
+[docs/checklist-pruebas.md](docs/checklist-pruebas.md).
+
+---
+
+## Despliegue con nginx y PM2
+
+En producción nginx sirve el Angular compilado por HTTPS y redirige `/api`
+al backend, que corre con PM2 en el puerto 4000. Puede convivir con el
+entorno de desarrollo (3000 y 4200) porque usa otros puertos.
+
+```
+Navegador ──> nginx (80 → redirige a 443, HTTPS)
+                 ├── /         → Angular compilado (C:\nginx-1.30.6\html)
+                 └── /api/     → backend NestJS en el puerto 4000 (PM2)
+                                    └── PostgreSQL
+```
+
+Los pasos están pensados para Windows y PowerShell.
+
+### 1. Backend con PM2
+
+Instalar PM2 (una sola vez):
+
+```bash
+npm install pm2 -g
+```
+
+Crear la configuración de producción copiando el ejemplo y completando la
+clave de PostgreSQL y un `JWT_SECRET` propio (no se versiona, como el `.env`):
+
+```powershell
+cd backend
+Copy-Item ecosystem.config.example.json ecosystem.config.json
+```
+
+Instalar, compilar y levantar (o reiniciar) con PM2:
+
+```bash
+npm run deploy
+```
+
+El backend queda en el puerto 4000, con Swagger apagado y logs con fecha y hora.
+
+### 2. Certificado HTTPS con mkcert
+
+Una sola vez. Después de instalar mkcert hay que abrir una terminal nueva.
+
+```powershell
+winget install --id FiloSottile.mkcert --exact
+mkcert -install
+```
+
+`mkcert -install` registra una autoridad certificadora local en Windows para
+que el navegador confíe en el certificado (pide confirmación). Si aparece un
+error de `keytool` (Java), se puede ignorar.
+
+### 3. nginx
+
+1. Descargar nginx para Windows (versión estable 1.30.6) desde
+   [nginx.org](https://nginx.org/en/download.html) y descomprimirlo en
+   `C:\nginx-1.30.6`.
+2. Generar el certificado dentro de su carpeta `conf\ssl`:
+
+   ```powershell
+   cd C:\nginx-1.30.6\conf
+   mkdir ssl
+   cd ssl
+   mkcert localhost
+   ```
+
+3. Reemplazar `C:\nginx-1.30.6\conf\nginx.conf` por
+   [docs/nginx.conf](docs/nginx.conf) del repo.
+4. Compilar el frontend y copiarlo a la carpeta `html` de nginx (repetir cada
+   vez que cambie el frontend):
+
+   ```powershell
+   cd frontend
+   npm run build
+   Remove-Item C:\nginx-1.30.6\html\* -Recurse -Exclude 50x.html
+   Copy-Item dist\frontend\browser\* C:\nginx-1.30.6\html -Recurse
+   ```
+
+5. Iniciar nginx:
+
+   ```powershell
+   cd C:\nginx-1.30.6
+   start nginx
+   ```
+
+El sistema queda en `https://localhost`. Entrar por `http://localhost`
+redirige solo a HTTPS.
+
+### 4. Comandos útiles
+
+| Para | Comando |
+|---|---|
+| Ver el estado del backend | `pm2 list` |
+| Ver los logs del backend | `pm2 logs` |
+| Apagar el backend | `pm2 stop clinica-backend` |
+| Levantar el backend después de reiniciar Windows | `pm2 resurrect` |
+| Recargar nginx tras cambiar `nginx.conf` | `.\nginx.exe -s reload` (desde `C:\nginx-1.30.6`) |
+| Apagar nginx | `.\nginx.exe -s stop` (desde `C:\nginx-1.30.6`) |
+| Revisar que `nginx.conf` sea válido | `.\nginx.exe -t` (desde `C:\nginx-1.30.6`) |
