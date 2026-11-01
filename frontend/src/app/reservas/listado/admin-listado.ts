@@ -1,11 +1,13 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button'; 
+import { ButtonModule } from 'primeng/button';
 
+import { CancelarReservaBoton } from '../cancelar-reserva/cancelar-reserva-boton';
 import { EstadosReservasEnum } from '../estados-reservas-enum';
 import type { ListReservaDTO } from './list-reserva-dto';
 import { ReservasListadoApiClient } from './reservas-listado-api-client';
@@ -18,8 +20,11 @@ import { ReservasListadoApiClient } from './reservas-listado-api-client';
     CurrencyPipe,
     TableModule,
     InputTextModule,
-    ButtonModule, 
+    ButtonModule,
+    ConfirmDialogModule,
+    CancelarReservaBoton,
   ],
+  providers: [ConfirmationService],
   templateUrl: './admin-listado.html',
 })
 export class ListadoAdmin {
@@ -64,29 +69,5 @@ export class ListadoAdmin {
     this.fecha.set('');
     this.estado.set('');
     this.cargar();
-  }
-
-  
-  protected cancelar(id: number): void {
-    if (confirm('¿Estás seguro de cancelar este turno?')) {
-      this.reservasApi.cancelar(id).subscribe({
-        next: () => {
-          this.mensajes.add({
-            severity: 'success',
-            summary: 'Cancelado',
-            detail: 'El turno fue cancelado correctamente',
-          });
-          this.cargar(); 
-        },
-        error: (err: any) => { 
-          console.error(err);
-          this.mensajes.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'No se pudo cancelar el turno',
-          });
-        }
-      });
-    }
   }
 }

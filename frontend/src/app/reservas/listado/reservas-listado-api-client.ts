@@ -16,9 +16,4 @@ export class ReservasListadoApiClient {
 
     return this.http.get<ListReservaDTO[]>('/api/v1/reservas', { params });
   }
-
-  
-  cancelar(id: number): Observable<any> {
-    return this.http.put(`/api/v1/reservas/${id}`, {});
-  }
 }
