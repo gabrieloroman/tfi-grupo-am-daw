@@ -1,26 +1,31 @@
-<section class="p-4">
-  <h1>Listado de turnos</h1>
-  <p>Consultá y filtrá los turnos registrados en el sistema.</p>
+<section class="contenedor-admin" style="padding: 2rem; padding-top: 4rem;">
+  <div class="cabecera">
+    <h1 style="margin-bottom: 0.5rem; font-size: 1.5rem; color: #1e293b;">Listado de turnos</h1>
+    <p style="margin-bottom: 2rem; color: #64748b;">Consultá y filtrá los turnos registrados en el sistema.</p>
+  </div>
 
-  <div class="flex flex-wrap items-end gap-3 mb-4">
-    <div>
-      <label for="fecha">Fecha del turno</label>
+  <div class="filtros" style="background-color: #f8fafc; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; gap: 3rem; align-items: flex-end; margin-bottom: 2rem;">
+    
+    <div class="campo-filtro" style="display: flex; flex-direction: column; gap: 0.5rem; width: 250px;">
+      <label for="fecha" style="font-size: 0.875rem; font-weight: 500; color: #334155;">Fecha del turno</label>
       <input
         id="fecha"
         type="date"
         pInputText
         [ngModel]="fecha()"
         (ngModelChange)="fecha.set($event)"
+        style="width: 100%; box-sizing: border-box;"
       />
     </div>
 
-    <div>
-      <label for="estado">Estado del turno</label>
+    <div class="campo-filtro" style="display: flex; flex-direction: column; gap: 0.5rem; width: 250px;">
+      <label for="estado" style="font-size: 0.875rem; font-weight: 500; color: #334155;">Estado del turno</label>
       <select
         id="estado"
         class="p-inputtext"
         [ngModel]="estado()"
         (ngModelChange)="estado.set($event)"
+        style="width: 100%; box-sizing: border-box;"
       >
         <option value="">Todos los estados</option>
         <option [value]="estados.ACTIVO">Activo</option>
@@ -30,26 +35,18 @@
       </select>
     </div>
 
-    <button
-      type="button"
-      pButton
-      label="Buscar"
-      (click)="cargar()"
-    ></button>
-
-    <button
-      type="button"
-      pButton
-      label="Limpiar filtros"
-      severity="secondary"
-      (click)="limpiarFiltros()"
-    ></button>
+    <div class="acciones-filtro" style="display: flex; gap: 1rem;">
+      <button type="button" pButton label="Buscar" (click)="cargar()"></button>
+      <button type="button" pButton label="Limpiar" severity="secondary" (click)="limpiarFiltros()"></button>
+    </div>
   </div>
 
   @if (cargando()) {
-    <p>Cargando turnos...</p>
+    <p style="padding: 2rem; text-align: center; color: #64748b;">Cargando turnos...</p>
   } @else {
-    <p>Turnos encontrados: {{ turnos().length }}</p>
+    <div class="info-tabla" style="margin-bottom: 1rem; font-size: 0.95rem;">
+      <p>Turnos encontrados: <strong>{{ turnos().length }}</strong></p>
+    </div>
 
     <p-table
       [value]="turnos()"
@@ -82,13 +79,19 @@
           <td>{{ turno.estado }}</td>
           
           <td>
-            <!-- (jt) Aparece solo si el turno está ACTIVO y todavía no empezó; confirma y recarga -->
-            <app-cancelar-reserva-boton [turno]="turno" (cancelada)="cargar()" />
+            @if (turno.estado === estados.ACTIVO) {
+               <button
+                type="button"
+                class="p-button p-button-danger p-button-sm btn-cancelar"
+                (click)="cancelar(turno.id)"
+                style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px;"
+              >
+                Cancelar
+              </button>
+            }
           </td>
         </tr>
       </ng-template>
     </p-table>
   }
 </section>
-
-<p-confirmdialog />
