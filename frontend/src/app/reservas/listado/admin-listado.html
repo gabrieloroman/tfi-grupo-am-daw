@@ -79,19 +79,14 @@
           <td>{{ turno.estado }}</td>
           
           <td>
-            @if (turno.estado === estados.ACTIVO) {
-               <button
-                type="button"
-                class="p-button p-button-danger p-button-sm btn-cancelar"
-                (click)="cancelar(turno.id)"
-                style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px;"
-              >
-                Cancelar
-              </button>
-            }
+            <!-- (jt) Botón reutilizable: solo aparece si el turno está ACTIVO y todavía no empezó,
+                 manda { estado: CANCELADO }, confirma y muestra el motivo si el backend lo rechaza -->
+            <app-cancelar-reserva-boton [turno]="turno" (cancelada)="cargar()" />
           </td>
         </tr>
       </ng-template>
     </p-table>
   }
 </section>
+
+<p-confirmdialog />
