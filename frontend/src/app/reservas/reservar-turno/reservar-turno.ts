@@ -138,16 +138,12 @@ export class ReservarTurno {
     this.enviando.set(true);
 
     const idPaciente = this.idPacienteSeleccionado();
-const dto = idPaciente
-  ? { idMedico, fechaHora, idPaciente }
-  : { idMedico, fechaHora };
+    const dto = idPaciente ? { idMedico, fechaHora, idPaciente } : { idMedico, fechaHora };
     this.gestionReservaApiClient.crear(dto).subscribe({
       next: () => {
         this.mensajes.add({ severity: 'success', summary: 'Listo', detail: 'Turno reservado' });
-         const destino = this.router.url.startsWith('/admin')
-          ? '/admin/reservar'
-          : '/paciente/mis-turnos';
-        void this.router.navigateByUrl('destino');
+        const destino = this.esAdministrador() ? '/admin/turnos' : '/paciente/mis-turnos';
+        void this.router.navigateByUrl(destino);
       },
       error: (err) => {
         this.enviando.set(false);
