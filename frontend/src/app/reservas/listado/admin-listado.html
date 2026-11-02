@@ -75,7 +75,7 @@
           <td>{{ turno.paciente }}</td>
           <td>{{ turno.documentoPaciente }}</td>
           <td>{{ turno.medico }}</td>
-          <td>{{ turno.valorConsulta | currency: 'ARS' }}</td>
+          <td>{{ turno.valorConsulta | currency: 'ARS' : 'symbol-narrow' : '1.0-0' }}</td>
           <td>{{ turno.estado }}</td>
           
           <td>
