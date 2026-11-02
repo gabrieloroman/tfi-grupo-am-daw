@@ -79,8 +79,6 @@
           <td>{{ turno.estado }}</td>
           
           <td>
-            <!-- (jt) Botón reutilizable: solo aparece si el turno está ACTIVO y todavía no empezó,
-                 manda { estado: CANCELADO }, confirma y muestra el motivo si el backend lo rechaza -->
             <app-cancelar-reserva-boton [turno]="turno" (cancelada)="cargar()" />
           </td>
         </tr>

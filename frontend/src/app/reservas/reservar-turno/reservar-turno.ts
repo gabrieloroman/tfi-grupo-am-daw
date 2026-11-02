@@ -11,14 +11,12 @@ import { GestionReservaApiClient, type PacienteDTO } from '../gestion/gestion-re
 import { hoyEnFormatoIso, mensajeDeError } from '../listado/reservas-listado';
 import { type MedicoDTO, ReservarTurnoApiClient } from './reservar-turno-api-client';
 
-// Devuelve la fecha de dentro de N días
 function dentroDeDias(dias: number): Date {
   const fecha = new Date();
   fecha.setDate(fecha.getDate() + dias);
   return fecha;
 }
 
-// (hz) Pantalla del paciente: reservar un turno
 @Component({
   selector: 'app-reservar-turno',
   imports: [DatePipe, CurrencyPipe, RouterLink, ButtonModule, InputTextModule],
@@ -31,7 +29,6 @@ export class ReservarTurno {
   private readonly router = inject(Router);
   private readonly authStore = inject(AuthStore);
 
-  // Límites del calendario: desde hoy hasta 30 días (regla del TP)
   protected readonly fechaMinima = hoyEnFormatoIso();
   protected readonly fechaMaxima = hoyEnFormatoIso(dentroDeDias(30));
 
@@ -43,14 +40,11 @@ export class ReservarTurno {
   protected readonly cargandoHorarios = signal(false);
   protected readonly enviando = signal(false);
 
-  //--------nuevo: señales para los pacientes activos-------------------------
-
   protected readonly esAdministrador = computed(() => this.authStore.rol() === RolesEnum.ADMINISTRADOR);
   protected readonly pacientes = signal<PacienteDTO[]>([]);
   protected readonly idPacienteSeleccionado = signal<number | null>(null);
 
   
- // El médico elegido en el desplegable (para mostrar nombre y valor)
   protected readonly medicoElegido = computed(() =>
     this.medicos().find((medico) => medico.id === this.idMedico()),
   );
@@ -65,11 +59,9 @@ export class ReservarTurno {
           detail: mensajeDeError(err, 'No se pudieron cargar los médicos'),
         }),
     });
-    //----Cargar pacinetes activos para el admin
 
 
 
-    // (jt) Solo el administrador puede pedir la lista de pacientes
     if (!this.esAdministrador()) {
       return;
     }
@@ -100,7 +92,6 @@ export class ReservarTurno {
     this.buscarHorarios();
   }
 
-  // Cada vez que cambia el médico o la fecha, se piden los horarios libres
   private buscarHorarios(): void {
     this.horarioElegido.set(null);
     this.horarios.set([]);
@@ -152,7 +143,7 @@ export class ReservarTurno {
           summary: 'No se pudo reservar',
           detail: mensajeDeError(err, 'No se pudo reservar el turno'),
         });
-        this.buscarHorarios(); // por si alguien ocupó ese horario mientras tanto
+        this.buscarHorarios();
       },
     });
   }

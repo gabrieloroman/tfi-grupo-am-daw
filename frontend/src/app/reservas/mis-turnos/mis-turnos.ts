@@ -13,7 +13,6 @@ import type { ListReservaDTO } from '../listado/list-reserva-dto';
 import { mensajeDeError } from '../listado/reservas-listado';
 import { ReservasListadoApiClient } from '../listado/reservas-listado-api-client';
 
-// (hz) Pantalla del paciente: lista sus turnos y permite cancelarlos
 @Component({
   selector: 'app-mis-turnos',
   imports: [DatePipe, CurrencyPipe, RouterLink, TableModule, ButtonModule, ConfirmDialogModule, EstadoReservaTag],
@@ -33,7 +32,6 @@ export class MisTurnos {
     this.cargar();
   }
 
-  // Pide al backend los turnos del paciente (sin fecha = todos)
   protected cargar(): void {
     this.cargando.set(true);
 
@@ -53,7 +51,6 @@ export class MisTurnos {
     });
   }
 
-  // Misma regla que el backend: turno ACTIVO y a partir de mañana
   protected puedeCancelar(turno: ListReservaDTO): boolean {
     if (turno.estado !== EstadosReservasEnum.ACTIVO) {
       return false;
@@ -63,7 +60,6 @@ export class MisTurnos {
     return new Date(turno.fechaHora) >= inicioDeManana;
   }
 
-  // Muestra el cartel "¿Confirmás cancelar...?"
   protected confirmarCancelacion(turno: ListReservaDTO): void {
     this.confirmacion.confirm({
       header: 'Cancelar turno',

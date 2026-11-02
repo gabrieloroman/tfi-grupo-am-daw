@@ -22,7 +22,7 @@ type RequestAutenticado = Request & { usuario: { sub: number; rol: RolesUsuarios
 export class ReservasController {
 
     constructor(private readonly service: ReservasService,
-        private readonly usuariosService: UsuariosService        //<---inyeccion del servicio de usuarios-->
+        private readonly usuariosService: UsuariosService
         
     ) { }
 
@@ -30,8 +30,6 @@ export class ReservasController {
     @ApiBearerAuth()
     @ApiCreatedResponse({ type: ReservaCreadaDTO })
     @Post()
-    // (hz) El paciente reserva un turno (el id del paciente sale del token)
-    // (jt) El administrador reserva para el paciente que indica en idPaciente
     async crearReserva(@Body() dto: CreateReservaDto, @Req() request: RequestAutenticado): Promise<ReservaCreadaDTO> {
         return await this.service.crear(request.usuario.sub, request.usuario.rol, dto);
     }
@@ -42,7 +40,6 @@ export class ReservasController {
     @ApiOkResponse({ description: "Reserva cancelada (paciente o administrador) o asistencia registrada (médico)" })
     @Put(":id")
     async actualizarReserva(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateReservaDto, @Req() request: RequestAutenticado): Promise<void> {
-        // (hz) Si el estado es CANCELADO, cancela; si no, el médico marca asistencia (igual que antes)
         if (dto.estado === EstadosReservasEnum.CANCELADO) {
             await this.service.cancelar(request.usuario.sub, request.usuario.rol, id);
         } else {
@@ -58,8 +55,6 @@ export class ReservasController {
         return await this.service.listar(request.usuario.sub, request.usuario.rol, query.fecha, query.estado);
     }
 
-    // (hz) Horarios libres de un médico en una fecha.
-    
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
     @ApiOkResponse({ type: HorariosDisponiblesDTO })
@@ -67,8 +62,6 @@ export class ReservasController {
     async obtenerDisponibilidad(@Query() query: DisponibilidadQueryDto): Promise<HorariosDisponiblesDTO> {
         return await this.service.horariosDisponibles(Number(query.idMedico), query.fecha);
     }
-        // Nuevo endpoint: listar pacientes activos
-    // (jt) Solo para el administrador, que elige paciente al reservar
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
     @ApiOkResponse({ type: PacienteDTO, isArray: true })

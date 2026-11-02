@@ -8,9 +8,6 @@ import { GestionReservaApiClient } from '../gestion/gestion-reserva-api-client';
 import type { ListReservaDTO } from '../listado/list-reserva-dto';
 import { mensajeDeError } from '../listado/reservas-listado';
 
-// (jt) Botón para que el administrador cancele un turno, hasta el momento en que inicia la consulta.
-// La pantalla que lo use tiene que proveer ConfirmationService y tener un <p-confirmdialog />,
-// igual que mis-turnos. Avisa con (cancelada) para que la pantalla recargue el listado.
 @Component({
   selector: 'app-cancelar-reserva-boton',
   imports: [ButtonModule],
@@ -38,7 +35,6 @@ export class CancelarReservaBoton {
   readonly turno = input.required<ListReservaDTO>();
   readonly cancelada = output<void>();
 
-  // Misma regla que el backend: turno ACTIVO que todavía no empezó
   protected readonly puedeCancelar = computed(
     () =>
       this.turno().estado === EstadosReservasEnum.ACTIVO &&

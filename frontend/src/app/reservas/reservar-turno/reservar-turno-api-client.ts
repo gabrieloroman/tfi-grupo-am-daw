@@ -2,7 +2,6 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 
-// (hz) Datos de un médico, tal como los devuelve GET /medicos
 export interface MedicoDTO {
   id: number;
   nombres: string;
@@ -11,13 +10,11 @@ export interface MedicoDTO {
   valorConsulta: number;
 }
 
-// (hz) Respuesta de GET /reservas/disponibilidad
 export interface HorariosDisponiblesDTO {
   fecha: string;
   horarios: string[];
 }
 
-// (hz) Llamadas al backend que necesita la pantalla de reservar turno
 @Injectable({ providedIn: 'root' })
 export class ReservarTurnoApiClient {
   private readonly http = inject(HttpClient);

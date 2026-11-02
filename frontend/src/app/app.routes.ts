@@ -42,7 +42,6 @@ export const routes: Routes = [
     ],
   },
 
-  // --- RUTAS DEL ADMINISTRADOR ---
   {
     path: 'admin',
     canActivate: [authGuard, rolGuard(RolesEnum.ADMINISTRADOR)],
@@ -58,10 +57,10 @@ export const routes: Routes = [
         path: 'turnos',
         title: 'Listado de turnos - Administrador',
         loadComponent: () =>
-          import('./reservas/listado/admin-listado') // <- OJO: Verificá que el archivo esté en esta ruta
+          import('./reservas/listado/admin-listado')
             .then((m) => m.ListadoAdmin),
       },
-      { path: '', redirectTo: 'turnos', pathMatch: 'full' }, // Ahora entra directo al listado
+      { path: '', redirectTo: 'turnos', pathMatch: 'full' },
       {
         path: 'valor-consulta',
         title: 'Valores de consulta - Administrador',

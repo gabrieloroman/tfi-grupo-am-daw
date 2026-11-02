@@ -17,8 +17,6 @@ export class UsuariosService {
 
         return await this.repository.findOne({ where: { documento, estado: EstadosUsuariosEnum.ACTIVO } })
     }
-    //----nuevo metodo para que el admin pueda listar pacientes----
-    // (jt) Devuelve un DTO para no exponer la clave ni otros datos del usuario
     async listarPacientesActivos(): Promise<PacienteDTO[]> {
         const pacientes = await this.repository.find({
             where: {
