@@ -1,6 +1,10 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
+import { TableModule } from 'primeng/table';
 
 import {
     ReservarTurnoApiClient,
@@ -10,7 +14,7 @@ import {
 @Component({
     selector: 'app-valor-consulta',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, TableModule, InputTextModule, ButtonModule, MessageModule],
     templateUrl: './valor-consulta.html',
 })
 export class ValorConsulta implements OnInit {
