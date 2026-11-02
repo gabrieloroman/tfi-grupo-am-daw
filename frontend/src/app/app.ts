@@ -38,7 +38,6 @@ export class App {
           { ruta: '/paciente/reservar', texto: 'Reservar turno' },
         ];
 
-      // --- AGREGAMOS EL CASO ADMINISTRADOR ---
       case RolesEnum.ADMINISTRADOR:
         return [
           { ruta: '/admin/turnos', texto: 'Listado de turnos' },

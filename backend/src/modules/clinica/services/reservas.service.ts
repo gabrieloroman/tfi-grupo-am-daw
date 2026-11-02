@@ -12,7 +12,6 @@ import { ReservaCreadaDTO } from "../dtos/output/reserva-creada.dto.js";
 import { Usuario } from "../../auth/entities/usuario.entity.js";
 import { EstadosUsuariosEnum } from "../enums/estados-usuarios.enum.js";
 
-// (hz) Reglas de negocio del TP
 const HORA_APERTURA = 8;
 const HORA_CIERRE = 16;
 const DIAS_MAXIMOS_ANTICIPACION = 30;
@@ -23,7 +22,7 @@ export class ReservasService {
 
     constructor(@InjectRepository(Reserva) private readonly repository: Repository<Reserva>,
         private readonly medicosService: MedicosService,
-        @InjectRepository(Usuario) private readonly usuarioRepository: Repository<Usuario>,//agrego reposit4----
+        @InjectRepository(Usuario) private readonly usuarioRepository: Repository<Usuario>,
     ) { }
 
         async listar(idUsuario: number, rol: RolesUsuariosEnum, fecha?: string, estado?: EstadosReservasEnum): Promise<ListReservaDTO[]> {
@@ -42,14 +41,13 @@ export class ReservasService {
                 if (fecha) {
                     where.fechaHora = this.rangoDelDia(fecha);
                 }
-            } else if (rol=== RolesUsuariosEnum.ADMINISTRADOR){ //Agrego Administrador 4-----------------------
+            } else if (rol=== RolesUsuariosEnum.ADMINISTRADOR){
                 if(fecha){
                      where.fechaHora = this.rangoDelDia(fecha);
                 }
             } else {
                 throw new ForbiddenException("El rol del usuario no puede listar reservas");
             }
-            //---------------------------------
             if (estado) {
                 where.estado = estado;
             }
@@ -71,15 +69,12 @@ export class ReservasService {
             }));
         }
 
-        // (hz) El paciente reserva un turno para sí mismo
-        // El administrador reserva para el paciente que indica en dto.idPaciente
         async crear(idUsuario: number, rol: RolesUsuariosEnum, dto: CreateReservaDto): Promise<ReservaCreadaDTO> {
-            let idPacienteAUsar = idUsuario;//agrego variable----
+            let idPacienteAUsar = idUsuario;
             if (rol === RolesUsuariosEnum.ADMINISTRADOR){
                 if (!dto.idPaciente){
                     throw new BadRequestException("El administrador debe indicar el id del paciente");
                 }
-                // validamos que el paciente exista, sea rol paciente y este activo
                 const paciente = await this.usuarioRepository.findOne({
                     where: {id: dto.idPaciente,rol: RolesUsuariosEnum.PACIENTE}
                 });
@@ -97,7 +92,6 @@ export class ReservasService {
     
             const medico = await this.medicosService.buscarPorId(dto.idMedico);
     
-            // Regla: no se puede reservar un horario ya ocupado (los cancelados liberan el horario)
             const ocupado = await this.repository.exists({
                 where: { idMedico: medico.id, fechaHora, estado: Not(EstadosReservasEnum.CANCELADO) },
             });
@@ -108,10 +102,10 @@ export class ReservasService {
     
             const reserva = this.repository.create({
                 idMedico: medico.id,
-                idPaciente: idPacienteAUsar,//---cambio idUsuario por esto-----
+                idPaciente: idPacienteAUsar,
                 fechaHora,
                 estado: EstadosReservasEnum.ACTIVO,
-                valorConsulta: medico.valorConsulta, // Regla: se congela el valor al momento de reservar
+                valorConsulta: medico.valorConsulta,
             });
     
             const guardada = await this.repository.save(reserva);
@@ -119,8 +113,6 @@ export class ReservasService {
             return { id: guardada.id };
         }
     
-        // (hz) El paciente cancela un turno propio, solo hasta el día anterior a la consulta
-        // (jt) El administrador cancela cualquier turno, hasta el momento en que inicia la consulta
         async cancelar(idUsuario: number, rol: RolesUsuariosEnum, id: number): Promise<void> {
 
             if (rol !== RolesUsuariosEnum.PACIENTE && rol !== RolesUsuariosEnum.ADMINISTRADOR) {
@@ -158,7 +150,6 @@ export class ReservasService {
             await this.repository.save(reserva);
         }
     
-        // (hz) Horarios libres de un médico en una fecha (turnos de 1 hora, de 8 a 16)
         async horariosDisponibles(idMedico: number, fecha: string): Promise<HorariosDisponiblesDTO> {
     
             const medico = await this.medicosService.buscarPorId(idMedico);
@@ -223,13 +214,10 @@ export class ReservasService {
     }
 
 
-    // ===================== (hz) Funciones auxiliares =====================
-
     private rangoDelDia(fecha: string) {
         return Between(new Date(`${fecha}T00:00:00`), new Date(`${fecha}T23:59:59.999`));
     }
 
-    // Primer instante que queda fuera de los 30 días permitidos
     private limiteDeAnticipacion(): Date {
         const ahora = new Date();
         return new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + DIAS_MAXIMOS_ANTICIPACION + 1);

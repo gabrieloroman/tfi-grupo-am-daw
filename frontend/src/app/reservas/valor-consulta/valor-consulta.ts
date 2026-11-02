@@ -39,8 +39,6 @@ export class ValorConsulta implements OnInit {
 
         this.api.listarMedicos().subscribe({
             next: (medicos) => {
-                console.log('Médicos recibidos:', medicos);
-
                 this.medicos = medicos;
 
                 this.valores = {};
@@ -55,9 +53,6 @@ export class ValorConsulta implements OnInit {
                 this.error = 'No se pudieron cargar los médicos.';
                 this.cargando = false;
                 this.cdr.detectChanges();
-            },
-            complete: () => {
-                console.log('Carga de médicos finalizada');
             },
         });
     }
